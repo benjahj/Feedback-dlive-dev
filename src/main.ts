@@ -63,6 +63,8 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 		} catch (error) {
 			this.log('error', `Unable to parse config: ${JSON.stringify(error)}`)
 		}
+		UpdateActions(this)
+		UpdateFeedbacks(this)
 		this.initialiseMidi()
 	}
 

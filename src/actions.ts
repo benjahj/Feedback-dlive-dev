@@ -109,23 +109,25 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 			},
 		},
 
-		inputToGroupAuxOn: {
-			name: 'Input to Group / Aux / Matrix',
-			description: 'Send an input to a group / aux / matrix',
+		inputToGroupAuxToggle: {
+			name: 'Toggle Input to Group / Aux / Matrix',
+			description: 'Toggle an input send to a group / aux / matrix on/off. Each press flips the current state.',
 			options: [
 				{ type: 'dropdown', label: 'Input Channel', id: 'input', default: 0, choices: makeDropdownChoices('Input Channel', INPUT_CHANNEL_COUNT), minChoicesForSearch: 0 },
 				...getChannelSelectOptions({ prefix: 'destination', include: ['mono_group', 'stereo_group', 'mono_aux', 'stereo_aux', 'mono_matrix', 'stereo_matrix'] }),
-				{ type: 'checkbox', label: 'On', id: 'on', default: true },
 			],
 			callback: async (action) => {
 				const o = action.options as Opts
+				const dstType = o.destinationChannelType as ChannelType
+				const dstNo = o[camelCase(`destination_${dstType}`)] as number
+				const currentState = companionModule.state.getSendState('input', o.input, dstType, dstNo)
 				companionModule.processCommand({
 					command: 'input_to_group_aux_on',
 					params: {
 						channelNo: o.input,
-						destinationChannelType: o.destinationChannelType,
-						destinationChannelNo: o[camelCase(`destination_${o.destinationChannelType}`)],
-						shouldEnable: o.on,
+						destinationChannelType: dstType,
+						destinationChannelNo: dstNo,
+						shouldEnable: !currentState,
 					},
 				})
 			},
