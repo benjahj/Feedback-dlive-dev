@@ -27,6 +27,7 @@ import {
 	stringToMidiBytes,
 } from './utils/index.js'
 import { parseDliveModuleConfig } from './validators/index.js'
+import { UpdateVariableDefinitions, UpdateVariableValues } from './variables.js'
 
 export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 	config?: DLiveModuleConfig
@@ -53,6 +54,8 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 		}
 		UpdateActions(this)
 		UpdateFeedbacks(this)
+		UpdateVariableDefinitions(this)
+		UpdateVariableValues(this)
 		this.initialiseMidi()
 	}
 
@@ -65,6 +68,8 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 		}
 		UpdateActions(this)
 		UpdateFeedbacks(this)
+		UpdateVariableDefinitions(this)
+		UpdateVariableValues(this)
 		this.initialiseMidi()
 	}
 
@@ -182,6 +187,7 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 
 		if (stateChanged) {
 			this.checkFeedbacks('channelMute', 'faderLevel', 'muteGroupActive', 'dcaMute', 'inputMute', 'channelSendActive')
+			UpdateVariableValues(this)
 		}
 	}
 
