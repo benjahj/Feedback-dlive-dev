@@ -121,6 +121,31 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 					this.log('debug', `Mute ${resolved.channelType} ${resolved.channelNo + 1}: ${isMuted ? 'ON' : 'OFF'}`)
 					stateChanged = true
 				}
+			} else if (msg.type === 'sysex' && msg.sysexData) {
+				// SysEx messages - parse send on/off state (message type 0x0E)
+				const d = msg.sysexData
+				// Format: F0 00 00 1A 50 10 01 00 <srcCh> <msgType> <srcNote> <dstCh> <dstNote> <value> F7
+				if (d.length >= 14 && d[0] === 0xf0 && d[1] === 0x00 && d[2] === 0x00 && d[3] === 0x1a &&
+					d[4] === 0x50 && d[5] === 0x10 && d[6] === 0x01 && d[7] === 0x00) {
+					const srcChOffset = d[8] - this.baseMidiChannel
+					const msgType = d[9]
+					const srcNote = d[10]
+					const dstChOffset = d[11] - this.baseMidiChannel
+					const dstNote = d[12]
+					const value = d[13]
+
+					if (msgType === 0x0e) {
+						// Send on/off
+						const src = resolveChannel(srcChOffset, srcNote)
+						const dst = resolveChannel(dstChOffset, dstNote)
+						if (src && dst) {
+							const isEnabled = value >= 0x40
+							this.state.setSendState(src.channelType, src.channelNo, dst.channelType, dst.channelNo, isEnabled)
+							this.log('debug', `Send ${src.channelType} ${src.channelNo + 1} -> ${dst.channelType} ${dst.channelNo + 1}: ${isEnabled ? 'ON' : 'OFF'}`)
+							stateChanged = true
+						}
+					}
+				}
 			} else if (msg.type === 'cc') {
 				// Control Change = NRPN messages (fader levels, assignments, etc.)
 				const cc = msg.data1
@@ -154,7 +179,7 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 		}
 
 		if (stateChanged) {
-			this.checkFeedbacks('channelMute', 'faderLevel', 'muteGroupActive', 'dcaMute', 'inputMute')
+			this.checkFeedbacks('channelMute', 'faderLevel', 'muteGroupActive', 'dcaMute', 'inputMute', 'channelSendActive')
 		}
 	}
 
@@ -264,6 +289,24 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 				case 'input_to_group_aux_on': {
 					const { channelNo, destinationChannelNo, destinationChannelType, shouldEnable } = params
 					const { midiChannelOffset, midiNoteOffset } = getMidiOffsetsForChannelType('input')
+					const { midiChannelOffset: destChOffset, midiNoteOffset: destNoteOffset } =
+						getMidiOffsetsForChannelType(destinationChannelType)
+					this.sendMidiToDlive([
+						...SYSEX_HEADER,
+						this.baseMidiChannel + midiChannelOffset,
+						0x0e,
+						channelNo + midiNoteOffset,
+						this.baseMidiChannel + destChOffset,
+						destinationChannelNo + destNoteOffset,
+						shouldEnable ? 0x40 : 0x00,
+						0xf7,
+					])
+					break
+				}
+
+				case 'channel_send_on_off': {
+					const { channelNo, channelType, destinationChannelNo, destinationChannelType, shouldEnable } = params
+					const { midiChannelOffset, midiNoteOffset } = getMidiOffsetsForChannelType(channelType)
 					const { midiChannelOffset: destChOffset, midiNoteOffset: destNoteOffset } =
 						getMidiOffsetsForChannelType(destinationChannelType)
 					this.sendMidiToDlive([

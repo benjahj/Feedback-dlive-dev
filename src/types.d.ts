@@ -50,6 +50,7 @@ type DLiveCommand =
 	| DLiveParametricEQCommand
 	| DLiveHPFFrequencyCommand
 	| DLiveSetHPFOnOffCommand
+	| DLiveChannelSendOnOffCommand
 
 type DLiveMuteOnCommand = {
 	command: 'mute_on'
@@ -178,6 +179,17 @@ type DLiveHPFFrequencyCommand = {
 type DLiveSetHPFOnOffCommand = {
 	command: 'set_hpf_on_off'
 	params: { channelNo: number; shouldEnable: boolean }
+}
+
+type DLiveChannelSendOnOffCommand = {
+	command: 'channel_send_on_off'
+	params: {
+		channelType: ChannelType
+		channelNo: number
+		destinationChannelType: ChannelType
+		destinationChannelNo: number
+		shouldEnable: boolean
+	}
 }
 
 type EqMidiParameters = {

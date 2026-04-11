@@ -294,6 +294,114 @@ export const UpdateFeedbacks = (companionModule: ModuleInstance): void => {
 				return companionModule.state.getMuteState('input', o.input as number)
 			},
 		},
+		channelSendActive: {
+			type: 'boolean',
+			name: 'Channel Send On/Off Status',
+			description: 'Changes button style when a specific send from a source channel to a destination (Aux, FX, Matrix, Group) is enabled.',
+			defaultStyle: {
+				bgcolor: combineRgb(0, 255, 0),
+				color: combineRgb(0, 0, 0),
+			},
+			options: [
+				// Source channel type
+				{
+					type: 'dropdown', label: 'Source Channel Type', id: 'channelType',
+					default: 'input',
+					choices: CHANNEL_TYPE_CHOICES.filter((c) =>
+						['input', 'mono_group', 'stereo_group', 'fx_return', 'stereo_ufx_return'].includes(c.id),
+					),
+					minChoicesForSearch: 0,
+				},
+				{
+					type: 'dropdown', label: 'Input Channel', id: 'input', default: 0,
+					choices: makeDropdownChoices('Input Channel', 128), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:channelType) == "input"`,
+				},
+				{
+					type: 'dropdown', label: 'Mono Group', id: 'monoGroup', default: 0,
+					choices: makeDropdownChoices('Mono Group', 62), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:channelType) == "mono_group"`,
+				},
+				{
+					type: 'dropdown', label: 'Stereo Group', id: 'stereoGroup', default: 0,
+					choices: makeDropdownChoices('Stereo Group', 31), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:channelType) == "stereo_group"`,
+				},
+				{
+					type: 'dropdown', label: 'FX Return', id: 'fxReturn', default: 0,
+					choices: makeDropdownChoices('FX Return', 16), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:channelType) == "fx_return"`,
+				},
+				{
+					type: 'dropdown', label: 'Stereo UFX Return', id: 'stereoUfxReturn', default: 0,
+					choices: makeDropdownChoices('Stereo UFX Return', 8), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:channelType) == "stereo_ufx_return"`,
+				},
+				// Destination channel type
+				{
+					type: 'dropdown', label: 'Destination Channel Type', id: 'destinationChannelType',
+					default: 'mono_aux',
+					choices: CHANNEL_TYPE_CHOICES.filter((c) =>
+						['mono_group', 'stereo_group', 'mono_aux', 'stereo_aux', 'mono_fx_send', 'stereo_fx_send', 'mono_matrix', 'stereo_matrix', 'stereo_ufx_send'].includes(c.id),
+					),
+					minChoicesForSearch: 0,
+				},
+				{
+					type: 'dropdown', label: 'Dest Mono Group', id: 'destinationMonoGroup', default: 0,
+					choices: makeDropdownChoices('Mono Group', 62), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "mono_group"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Stereo Group', id: 'destinationStereoGroup', default: 0,
+					choices: makeDropdownChoices('Stereo Group', 31), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "stereo_group"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Mono Aux', id: 'destinationMonoAux', default: 0,
+					choices: makeDropdownChoices('Mono Aux', 62), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "mono_aux"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Stereo Aux', id: 'destinationStereoAux', default: 0,
+					choices: makeDropdownChoices('Stereo Aux', 32), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "stereo_aux"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Mono FX Send', id: 'destinationMonoFxSend', default: 0,
+					choices: makeDropdownChoices('Mono FX Send', 16), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "mono_fx_send"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Stereo FX Send', id: 'destinationStereoFxSend', default: 0,
+					choices: makeDropdownChoices('Stereo FX Send', 16), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "stereo_fx_send"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Mono Matrix', id: 'destinationMonoMatrix', default: 0,
+					choices: makeDropdownChoices('Mono Matrix', 62), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "mono_matrix"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Stereo Matrix', id: 'destinationStereoMatrix', default: 0,
+					choices: makeDropdownChoices('Stereo Matrix', 31), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "stereo_matrix"`,
+				},
+				{
+					type: 'dropdown', label: 'Dest Stereo UFX Send', id: 'destinationStereoUfxSend', default: 0,
+					choices: makeDropdownChoices('Stereo UFX Send', 8), minChoicesForSearch: 0,
+					isVisibleExpression: `$(options:destinationChannelType) == "stereo_ufx_send"`,
+				},
+			],
+			callback: (feedback) => {
+				const o = feedback.options as Opts
+				const srcType = o.channelType as ChannelType
+				const srcNo = o[camelCase(srcType)] as number
+				const dstType = o.destinationChannelType as ChannelType
+				const dstNo = o[camelCase(`destination_${dstType}`)] as number
+				if (srcNo === undefined || dstNo === undefined) return false
+				return companionModule.state.getSendState(srcType, srcNo, dstType, dstNo)
+			},
+		},
 	}
 
 	companionModule.setFeedbackDefinitions(feedbacks)

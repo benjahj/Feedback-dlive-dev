@@ -131,6 +131,34 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 			},
 		},
 
+		channelSendOnOff: {
+			name: 'Channel Send On/Off',
+			description: 'Enable or disable a send from any channel to an Aux, FX Send, Matrix, or Group',
+			options: [
+				...getChannelSelectOptions({
+					include: ['input', 'mono_group', 'stereo_group', 'fx_return', 'stereo_ufx_return'],
+				}),
+				...getChannelSelectOptions({
+					prefix: 'destination',
+					include: ['mono_group', 'stereo_group', 'mono_aux', 'stereo_aux', 'mono_fx_send', 'stereo_fx_send', 'mono_matrix', 'stereo_matrix', 'stereo_ufx_send'],
+				}),
+				{ type: 'checkbox', label: 'On', id: 'on', default: true },
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({
+					command: 'channel_send_on_off',
+					params: {
+						channelType: o.channelType,
+						channelNo: o[camelCase(o.channelType)],
+						destinationChannelType: o.destinationChannelType,
+						destinationChannelNo: o[camelCase(`destination_${o.destinationChannelType}`)],
+						shouldEnable: o.on,
+					},
+				})
+			},
+		},
+
 		dcaAssign: {
 			name: 'Assign to DCA',
 			description: 'Assign a channel to a DCA',
