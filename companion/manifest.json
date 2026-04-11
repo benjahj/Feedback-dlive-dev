@@ -1,22 +1,25 @@
 {
 	"id": "feedback-dlive-dev",
-	"name": "feedback-dlive-dev",
+	"name": "Feedback-dLive-Dev",
 	"shortname": "dLive FB",
-	"description": "Allen & Heath dLive module with Feedback support (Mute Groups, DCA, Faders, etc.)",
-	"version": "1.0.0",
+	"description": "Allen & Heath dLive module with Feedback support",
+	"version": "1.0.1",
 	"license": "MIT",
+	"repository": "https://github.com/benjahj/Feedback-dlive-dev.git",
+	"bugs": "https://github.com/benjahj/Feedback-dlive-dev/issues",
 	"maintainers": [
 		{
-			"name": "Custom Dev"
+			"name": "benjahj"
 		}
 	],
+	"legacyIds": [],
 	"runtime": {
-		"type": "node22",
+		"type": "node18",
 		"api": "nodejs-ipc",
-		"apiVersion": "1.4.0",
+		"apiVersion": "0.0.0",
 		"entrypoint": "../dist/main.js"
 	},
-	"manufacturer": "Allen & Heath",
-	"products": ["dLive"],
-	"keywords": ["Audio", "Sound", "Feedback"]
+	"manufacturer": "A&H Custom",
+	"products": ["dLive Feedback"],
+	"keywords": ["Audio", "Sound"]
 }

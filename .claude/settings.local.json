@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf \"C:/SynologyDrive/Companion-Usermodules-dev/companion-module-allenheath-dlive\")",
+      "Bash(rm -rf \"C:/SynologyDrive/Companion-Usermodules-dev/Dlive-Feedback-midi\")",
+      "Read(//c/SynologyDrive/Companion-Usermodules-dev/**)"
+    ]
+  }
+}
