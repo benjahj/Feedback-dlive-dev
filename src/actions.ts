@@ -109,6 +109,33 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 			},
 		},
 
+		inputToGroupAuxOn: {
+			name: 'Input to Group / Aux / Matrix (On/Off)',
+			description: 'Set an input send to a group / aux / matrix on or off',
+			options: [
+				{ type: 'dropdown', label: 'Input Channel', id: 'input', default: 0, choices: makeDropdownChoices('Input Channel', INPUT_CHANNEL_COUNT), minChoicesForSearch: 0 },
+				...getChannelSelectOptions({ prefix: 'destination', include: ['mono_group', 'stereo_group', 'mono_aux', 'stereo_aux', 'mono_matrix', 'stereo_matrix'] }),
+				{ type: 'checkbox', label: 'On', id: 'on', default: true },
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				const dstType = o.destinationChannelType as ChannelType
+				const dstNo = o[camelCase(`destination_${dstType}`)] as number
+				const shouldEnable = o.on as boolean
+				companionModule.state.setSendState('input', o.input, dstType, dstNo, shouldEnable)
+				companionModule.checkFeedbacks('channelSendActive')
+				companionModule.processCommand({
+					command: 'input_to_group_aux_on',
+					params: {
+						channelNo: o.input,
+						destinationChannelType: dstType,
+						destinationChannelNo: dstNo,
+						shouldEnable,
+					},
+				})
+			},
+		},
+
 		inputToGroupAuxToggle: {
 			name: 'Toggle Input to Group / Aux / Matrix',
 			description: 'Toggle an input send to a group / aux / matrix on/off. Each press flips the current state.',
@@ -121,13 +148,51 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 				const dstType = o.destinationChannelType as ChannelType
 				const dstNo = o[camelCase(`destination_${dstType}`)] as number
 				const currentState = companionModule.state.getSendState('input', o.input, dstType, dstNo)
+				const newState = !currentState
+				companionModule.state.setSendState('input', o.input, dstType, dstNo, newState)
+				companionModule.checkFeedbacks('channelSendActive')
 				companionModule.processCommand({
 					command: 'input_to_group_aux_on',
 					params: {
 						channelNo: o.input,
 						destinationChannelType: dstType,
 						destinationChannelNo: dstNo,
-						shouldEnable: !currentState,
+						shouldEnable: newState,
+					},
+				})
+			},
+		},
+
+		channelSendOnOff: {
+			name: 'Channel Send On/Off',
+			description: 'Set a send from any channel to an Aux, FX Send, Matrix, or Group on or off',
+			options: [
+				...getChannelSelectOptions({
+					include: ['input', 'mono_group', 'stereo_group', 'fx_return', 'stereo_ufx_return'],
+				}),
+				...getChannelSelectOptions({
+					prefix: 'destination',
+					include: ['mono_group', 'stereo_group', 'mono_aux', 'stereo_aux', 'mono_fx_send', 'stereo_fx_send', 'mono_matrix', 'stereo_matrix', 'stereo_ufx_send'],
+				}),
+				{ type: 'checkbox', label: 'On', id: 'on', default: true },
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				const srcType = o.channelType as ChannelType
+				const srcNo = o[camelCase(srcType)] as number
+				const dstType = o.destinationChannelType as ChannelType
+				const dstNo = o[camelCase(`destination_${dstType}`)] as number
+				const shouldEnable = o.on as boolean
+				companionModule.state.setSendState(srcType, srcNo, dstType, dstNo, shouldEnable)
+				companionModule.checkFeedbacks('channelSendActive')
+				companionModule.processCommand({
+					command: 'channel_send_on_off',
+					params: {
+						channelType: srcType,
+						channelNo: srcNo,
+						destinationChannelType: dstType,
+						destinationChannelNo: dstNo,
+						shouldEnable,
 					},
 				})
 			},
@@ -152,6 +217,9 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 				const dstType = o.destinationChannelType as ChannelType
 				const dstNo = o[camelCase(`destination_${dstType}`)] as number
 				const currentState = companionModule.state.getSendState(srcType, srcNo, dstType, dstNo)
+				const newState = !currentState
+				companionModule.state.setSendState(srcType, srcNo, dstType, dstNo, newState)
+				companionModule.checkFeedbacks('channelSendActive')
 				companionModule.processCommand({
 					command: 'channel_send_on_off',
 					params: {
@@ -159,7 +227,7 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 						channelNo: srcNo,
 						destinationChannelType: dstType,
 						destinationChannelNo: dstNo,
-						shouldEnable: !currentState,
+						shouldEnable: newState,
 					},
 				})
 			},
