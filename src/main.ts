@@ -101,7 +101,14 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 				this.log('debug', `MIDI Connected to ${host}`)
 			})
 			.on('data', (data) => {
-				this.handleMidiData(data)
+				try {
+					this.handleMidiData(data)
+				} catch (error) {
+					this.log(
+						'error',
+						`Error processing incoming MIDI: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+					)
+				}
 			})
 	}
 

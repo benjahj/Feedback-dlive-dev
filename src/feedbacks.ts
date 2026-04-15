@@ -393,13 +393,19 @@ export const UpdateFeedbacks = (companionModule: ModuleInstance): void => {
 				},
 			],
 			callback: (feedback) => {
-				const o = feedback.options as Opts
-				const srcType = o.channelType as ChannelType
-				const srcNo = o[camelCase(srcType)] as number
-				const dstType = o.destinationChannelType as ChannelType
-				const dstNo = o[camelCase(`destination_${dstType}`)] as number
-				if (srcNo === undefined || dstNo === undefined) return false
-				return companionModule.state.getSendState(srcType, srcNo, dstType, dstNo)
+				try {
+					const o = feedback.options as Opts
+					const srcType = o.channelType as ChannelType
+					if (!srcType) return false
+					const srcNo = o[camelCase(srcType)] as number
+					const dstType = o.destinationChannelType as ChannelType
+					if (!dstType) return false
+					const dstNo = o[camelCase(`destination_${dstType}`)] as number
+					if (srcNo === undefined || dstNo === undefined) return false
+					return companionModule.state.getSendState(srcType, srcNo, dstType, dstNo)
+				} catch {
+					return false
+				}
 			},
 		},
 	}
