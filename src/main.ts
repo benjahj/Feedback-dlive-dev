@@ -500,6 +500,40 @@ export class ModuleInstance extends InstanceBase<DLiveModuleConfig> {
 					])
 					break
 				}
+
+				case 'set_ufx_global_key': {
+					const { key } = params
+					this.sendMidiToDlive([0xb0 + this.baseMidiChannel, 0x0c, key])
+					break
+				}
+
+				case 'set_ufx_global_scale': {
+					const { scale } = params
+					this.sendMidiToDlive([0xb0 + this.baseMidiChannel, 0x0d, scale])
+					break
+				}
+
+				case 'set_fx_parameter': {
+					const { midiChannel, controlNumber, value } = params
+					this.state.setFxParam(midiChannel, controlNumber, value)
+					this.sendMidiToDlive([0xb0 + midiChannel, controlNumber, value])
+					break
+				}
+
+				case 'fx_tap_tempo': {
+					const { midiChannel, controlNumber } = params
+					// Send CC pulse: value 0x7F (press) then 0x00 (release)
+					this.sendMidiToDlive([0xb0 + midiChannel, controlNumber, 0x7f])
+					this.sendMidiToDlive([0xb0 + midiChannel, controlNumber, 0x00])
+					break
+				}
+
+				case 'adjust_fx_parameter': {
+					const { midiChannel, controlNumber, adjustment } = params
+					const newValue = this.state.adjustFxParam(midiChannel, controlNumber, adjustment)
+					this.sendMidiToDlive([0xb0 + midiChannel, controlNumber, newValue])
+					break
+				}
 			}
 		} catch (error) {
 			this.log('error', `Error sending command: ${JSON.stringify(error)}`)

@@ -202,6 +202,26 @@ export const FADER_LEVEL_CHOICES: DropdownChoice[] = times((index: number) => {
 	return { label: `${levelString} dB`, id }
 })(FADER_STEP_COUNT)
 
+export const UFX_KEY_CHOICES: DropdownChoice[] = [
+	{ label: 'C', id: 0x00 },
+	{ label: 'C#', id: 0x01 },
+	{ label: 'D', id: 0x02 },
+	{ label: 'D#', id: 0x03 },
+	{ label: 'E', id: 0x04 },
+	{ label: 'F', id: 0x05 },
+	{ label: 'F#', id: 0x06 },
+	{ label: 'G', id: 0x07 },
+	{ label: 'G#', id: 0x08 },
+	{ label: 'A', id: 0x09 },
+	{ label: 'A#', id: 0x0a },
+	{ label: 'B', id: 0x0b },
+]
+
+export const UFX_SCALE_CHOICES: DropdownChoice[] = [
+	{ label: 'Major', id: 0x00 },
+	{ label: 'Minor', id: 0x01 },
+]
+
 export const MAIN_MIDI_CHANNEL_CHOICES: DropdownChoice[] = [
 	{ label: '1 to 5', id: 0 },
 	{ label: '2 to 6', id: 1 },

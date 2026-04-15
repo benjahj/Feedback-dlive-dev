@@ -5,6 +5,7 @@ export class DLiveState {
 	private muteStates: Map<string, boolean> = new Map()
 	private faderLevels: Map<string, number> = new Map()
 	private sendStates: Map<string, boolean> = new Map()
+	private fxParams: Map<string, number> = new Map()
 
 	private makeKey(channelType: ChannelType, channelNo: number): string {
 		return `${channelType}:${channelNo}`
@@ -48,9 +49,29 @@ export class DLiveState {
 		return this.sendStates.get(this.makeSendKey(srcType, srcNo, dstType, dstNo)) ?? false
 	}
 
+	private makeFxKey(midiChannel: number, cc: number): string {
+		return `fx:${midiChannel}:${cc}`
+	}
+
+	setFxParam(midiChannel: number, cc: number, value: number): void {
+		this.fxParams.set(this.makeFxKey(midiChannel, cc), Math.max(0, Math.min(127, value)))
+	}
+
+	getFxParam(midiChannel: number, cc: number): number {
+		return this.fxParams.get(this.makeFxKey(midiChannel, cc)) ?? 0
+	}
+
+	adjustFxParam(midiChannel: number, cc: number, adjustment: number): number {
+		const current = this.getFxParam(midiChannel, cc)
+		const newValue = Math.max(0, Math.min(127, current + adjustment))
+		this.setFxParam(midiChannel, cc, newValue)
+		return newValue
+	}
+
 	clear(): void {
 		this.muteStates.clear()
 		this.faderLevels.clear()
 		this.sendStates.clear()
+		this.fxParams.clear()
 	}
 }

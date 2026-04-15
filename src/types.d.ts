@@ -51,6 +51,11 @@ type DLiveCommand =
 	| DLiveHPFFrequencyCommand
 	| DLiveSetHPFOnOffCommand
 	| DLiveChannelSendOnOffCommand
+	| DLiveSetFxParameterCommand
+	| DLiveFxTapTempoCommand
+	| DLiveAdjustFxParameterCommand
+	| DLiveSetUfxGlobalKeyCommand
+	| DLiveSetUfxGlobalScaleCommand
 
 type DLiveMuteOnCommand = {
 	command: 'mute_on'
@@ -190,6 +195,31 @@ type DLiveChannelSendOnOffCommand = {
 		destinationChannelNo: number
 		shouldEnable: boolean
 	}
+}
+
+type DLiveSetFxParameterCommand = {
+	command: 'set_fx_parameter'
+	params: { midiChannel: number; controlNumber: number; value: number }
+}
+
+type DLiveFxTapTempoCommand = {
+	command: 'fx_tap_tempo'
+	params: { midiChannel: number; controlNumber: number }
+}
+
+type DLiveAdjustFxParameterCommand = {
+	command: 'adjust_fx_parameter'
+	params: { midiChannel: number; controlNumber: number; adjustment: number }
+}
+
+type DLiveSetUfxGlobalKeyCommand = {
+	command: 'set_ufx_global_key'
+	params: { key: number }
+}
+
+type DLiveSetUfxGlobalScaleCommand = {
+	command: 'set_ufx_global_scale'
+	params: { scale: number }
 }
 
 type EqMidiParameters = {

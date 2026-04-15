@@ -17,6 +17,8 @@ import {
 	PREAMP_MAXIMUM_GAIN,
 	PREAMP_MINIMUM_GAIN,
 	SCENE_COUNT,
+	UFX_KEY_CHOICES,
+	UFX_SCALE_CHOICES,
 } from './constants.js'
 import { ModuleInstance } from './main.js'
 import { getChannelSelectOptions, getSocketSelectOptions, makeDropdownChoices } from './utils/index.js'
@@ -482,6 +484,121 @@ export const UpdateActions = (companionModule: ModuleInstance): void => {
 			callback: async (action) => {
 				const o = action.options as Opts
 				companionModule.processCommand({ command: 'set_hpf_on_off', params: { channelNo: o.input, shouldEnable: o.hpf } })
+			},
+		},
+
+		// ─── FX / UFX Actions ──────────────────────────────────────────────
+
+		setFxParameter: {
+			name: 'Set FX Parameter',
+			description:
+				'Set an FX parameter value using the MIDI channel and CC number configured on the dLive console. ' +
+				'Configure mappings in FX > UFX > Show Routing > MIDI Settings. ' +
+				'Use this for reverb time, delay time, mix level, or any other FX parameter.',
+			options: [
+				{
+					type: 'number', label: 'UFX MIDI Channel', id: 'midiChannel',
+					default: 6, min: 1, max: 16,
+					tooltip: 'The MIDI channel assigned to the UFX unit on the dLive console. Must NOT be within the main MIDI channel range (N to N+4).',
+				},
+				{
+					type: 'number', label: 'CC Number (Parameter)', id: 'controlNumber',
+					default: 0, min: 0, max: 127,
+					tooltip: 'The CC number mapped to the FX parameter on the dLive console.',
+				},
+				{
+					type: 'number', label: 'Value', id: 'value',
+					default: 64, min: 0, max: 127, range: true, step: 1,
+				},
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({
+					command: 'set_fx_parameter',
+					params: { midiChannel: (o.midiChannel as number) - 1, controlNumber: o.controlNumber, value: o.value },
+				})
+			},
+		},
+
+		fxTapTempo: {
+			name: 'FX Tap Tempo',
+			description:
+				'Send a tap tempo pulse to an FX unit. ' +
+				'Map a CC to the Tap Tempo parameter on the dLive console, then use that CC number here. ' +
+				'Each press sends a momentary CC pulse (0x7F then 0x00).',
+			options: [
+				{
+					type: 'number', label: 'UFX MIDI Channel', id: 'midiChannel',
+					default: 6, min: 1, max: 16,
+					tooltip: 'The MIDI channel assigned to the UFX unit on the dLive console.',
+				},
+				{
+					type: 'number', label: 'CC Number (Tap Tempo)', id: 'controlNumber',
+					default: 0, min: 0, max: 127,
+					tooltip: 'The CC number mapped to Tap Tempo on the dLive console.',
+				},
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({
+					command: 'fx_tap_tempo',
+					params: { midiChannel: (o.midiChannel as number) - 1, controlNumber: o.controlNumber },
+				})
+			},
+		},
+
+		adjustFxParameter: {
+			name: 'Adjust FX Parameter (+/-)',
+			description:
+				'Increment or decrement an FX parameter value relative to its current position. ' +
+				'Useful for rotary encoders or fine-tuning reverb time, delay feedback, etc.',
+			options: [
+				{
+					type: 'number', label: 'UFX MIDI Channel', id: 'midiChannel',
+					default: 6, min: 1, max: 16,
+					tooltip: 'The MIDI channel assigned to the UFX unit on the dLive console.',
+				},
+				{
+					type: 'number', label: 'CC Number (Parameter)', id: 'controlNumber',
+					default: 0, min: 0, max: 127,
+					tooltip: 'The CC number mapped to the FX parameter on the dLive console.',
+				},
+				{
+					type: 'number', label: 'Adjustment', id: 'adjustment',
+					default: 1, min: -127, max: 127,
+					tooltip: 'Amount to adjust. Positive = increase, negative = decrease.',
+				},
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({
+					command: 'adjust_fx_parameter',
+					params: { midiChannel: (o.midiChannel as number) - 1, controlNumber: o.controlNumber, adjustment: o.adjustment },
+				})
+			},
+		},
+
+		setUfxGlobalKey: {
+			name: 'Set UFX Global Key',
+			description: 'Set the global musical key for all UFX units',
+			options: [
+				{ type: 'dropdown', label: 'Key', id: 'key', default: 0, choices: UFX_KEY_CHOICES, minChoicesForSearch: 0 },
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({ command: 'set_ufx_global_key', params: { key: o.key } })
+			},
+		},
+
+		setUfxGlobalScale: {
+			name: 'Set UFX Global Scale',
+			description: 'Set the global musical scale for all UFX units',
+			options: [
+				{ type: 'dropdown', label: 'Scale', id: 'scale', default: 0, choices: UFX_SCALE_CHOICES, minChoicesForSearch: 0 },
+			],
+			callback: async (action) => {
+				const o = action.options as Opts
+				companionModule.processCommand({ command: 'set_ufx_global_scale', params: { scale: o.scale } })
 			},
 		},
 	})
